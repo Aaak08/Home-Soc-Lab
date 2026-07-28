@@ -25,3 +25,26 @@ Building a home SOC lab for hands on defensive cybersecurity practice
 -it also turns out the port forwarding rule dident carry over on its own so i had to manually add it by going to the network managed and then NAT networks-- Port forwarding but even after that i could nott get to the wazuh dashboard.
 -After a while it turns out the real issue was the Guest Ip being in a default 10.2.0.4 instead of the one i got from running the command "ip a"
 -Since this is dynamically applied it will change back on reboot and would need to be changed again..
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+-started building VM2 which was to be monitored by the manager i set up above.
+ - Ubuntu Server again, 2GB RAM, 1 CPU, 20GB disk -- lighter than the manager since this one just needs to run and generate activity
+ - Installing the Wazuh Agent..spent a long time doing this learnt a lot
+ - since staying fixed on one wazuh package is not really reliable this time i took it from wazuh's apt repository method (adds a signed GPG key + repo entry, then installs via apt, always resolves to current version)
+ - while typing out the commands to install stuff i found a bug or infact a mistake which is easy to look over and i kinda wasted half an hour on this.. so the echo command that writes the repo line into /etc/apt/sources.list.d/wazuh.list had a missing space between "deb" and "[signed-by=...]" -- apt read it as one broken word instead of two, giving "Type ... is not known" errors. Fixed by re-typing the line carefully with  the space in place but before getting there i was looking to find a easier way to copy paste stuff into ubuntu
+ - at first i learn of something called linux essentials i did install it mounted it but dident help much as it remained unresponsive as the version of ubuntu i used on my vm was just a bare console and essentials only worked on the GUI session.
+ - Then tried setting up a SSH from the host pc to the VM for easier copy pasting..
+ - Set up port forwarding for SSH (host port 2222 -> guest port 22) but kept hitting connection resets. Diagnosed as far as confirming SSH itself was running fine on the VM but the port forwarding rule kept getting corrupted in the VirtualBox UI
+ - Then decided this wasn't worth the time wasted on this and i just went on to type the entire command by hand more carefully back into the VM console instead....a great note here worth learning is too much debugging would just leave u further from your true objective and better off take the hard way.
+ - Then the agent installed but then it wouldn't connect to the manager...
+ -  Logs showed: "ERROR (1208): Unable to connect to enrollment service at 10.0.x.x]:xxxx" repeating every ~30-40 seconds.
+ -  Then went on to check and Confirmed wazuh-authd (the enrollment service) was genuinely running and listening on VM 1 so the service wasn't the issue
+ - Confirmed firewall (ufw) was inactive on VM 1 -- not a firewall block either.
+ - Then found the root cause..by using ping i found out that VM 2 couldn't reach VM 1 at the network level at all ("Destination Host Unreachable"), even though both showed IPs in the same-looking 10.0.x.x range.
+ - The actual problem was in the network settings as "NAT" and "NAT NETWORK" mode made both default to using the same identical looking ip subnet.
+ - VM 2 had been left on plain NAT (its own private, isolated network) instead of NAT Network (the shared one VM 1 was on) -- so despite looking like they  were on the same network, they were actually two separate, isolated ones.
+ - finally fixed that by switching VM2's adapter to NAT Network the same as VM1
+ - Important lesson learnt is to always check the VM's Individual settings.
+ - had a few typos on the way which also made me confused and while using ping it keeps on running unlike in windows use ping -c 4 <ip> to auto stop after few tries
+ -  Once the network was actually fixed, agent connected cleanly on its own within its normal retry cycle. Confirmed live in the Wazuh dashboard under Agents Management: Monitered-Client showing as Active.
+- ## Milestone: full lab working end to end
+VirtualBox -> Ubuntu Server (manager) -> Wazuh installed -> Ubuntu Server(monitored client) -> agent installed -> agent connected -> confirmed active in dashboard.
