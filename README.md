@@ -21,3 +21,7 @@ Building a home SOC lab for hands on defensive cybersecurity practice
 - Fixed with port forwarding: VirtualBox → VM Settings → Network → Adapter 1 → Advanced → Port Forwarding added a rule with a host port and guest port
 -after that i tested if the dashboard was working by running it on my VM before try on my host browser using curl -k https;//local...
 -while entering the dashboard it gave out a connection not private warning which is when i learnt that wazuh uses a self signed certificate   
+-after a break i came back and switched the network settings from NAT to NAT Network so that the VM's can talk to each other which normal NAT cannot. 
+-it also turns out the port forwarding rule dident carry over on its own so i had to manually add it by going to the network managed and then NAT networks-- Port forwarding but even after that i could nott get to the wazuh dashboard.
+-After a while it turns out the real issue was the Guest Ip being in a default 10.2.0.4 instead of the one i got from running the command "ip a"
+-Since this is dynamically applied it will change back on reboot and would need to be changed again..
