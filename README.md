@@ -50,3 +50,6 @@ Building a home SOC lab for hands on defensive cybersecurity practice
 VirtualBox -> Ubuntu Server (manager) -> Wazuh installed -> Ubuntu Server(monitored client) -> agent installed -> agent connected -> confirmed active in dashboard.
 -Finally then went on to log in to VM2 and deliberately created activity by purposefully failing to type the right pass in sudo shutdown now..
 -Confirmed detection end-to-end in the dashboard: 4 authentication failure events logged, correctly attributed to Monitered-Client, and automatically classified under MITRE ATT&CK as "Password Guessing" / "Sudo and Sudo Caching"
+## Screenshots & Proof
+See the description of the images in the dashboard with the screenshots and raw event logs confirming the detection pipeline works end to end.
+## This was my first Soc lab thank you for taking your time reading through this and i will improve with time
